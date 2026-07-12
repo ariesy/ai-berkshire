@@ -90,16 +90,59 @@ def discover_sources() -> list[tuple[str, Path]]:
     return out
 
 
+def skill_frontmatter(name: str, description: str) -> str:
+    return (
+        "---\n"
+        f"name: {name}\n"
+        f"description: {yaml_quote(description)}\n"
+        "---\n\n"
+    )
+
+
+def skill_content(name: str, source: Path) -> str:
+    text = source.read_text(encoding="utf-8")
+    front, body = split_frontmatter(text)
+    description_source = front if front is not None else text
+    description = first_heading(description_source, name)
+    body_text = body if front is not None else text
+    note = ADAPTER_NOTE_TEMPLATE.format(name=name)
+    return skill_frontmatter(name, description) + note + body_text.lstrip("\n").rstrip() + "\n"
+
+
+def write_skill(name: str, source: Path, *, check: bool) -> bool:
+    content = skill_content(name, source)
+    dst = OPENCODE_DST / "skills" / name / "SKILL.md"
+    if check:
+        if not dst.exists() or dst.read_text(encoding="utf-8") != content:
+            print(f"  {dst.relative_to(ROOT)}")
+            return True
+        return False
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    dst.write_text(content, encoding="utf-8")
+    return False
+
+
 def main() -> None:
     check = "--check" in sys.argv[1:]
     unknown = [a for a in sys.argv[1:] if a != "--check"]
     if unknown:
         raise SystemExit(f"Unknown argument(s): {', '.join(unknown)}")
     sources = discover_sources()
+    if not check:
+        (OPENCODE_DST / "skills").mkdir(parents=True, exist_ok=True)
+    drifted: list[str] = []
+    for name, source in sources:
+        if write_skill(name, source, check=check):
+            drifted.append(name)
     if check:
-        print(f"(stub) would check {len(sources)} entries")
+        if drifted:
+            print(f"OpenCode skills are out of date ({len(drifted)} entries):")
+            for n in drifted:
+                print(f"  .opencode/skills/{n}/SKILL.md")
+            raise SystemExit(1)
+        print(f"Checked {len(sources)} OpenCode skills in .opencode/skills")
         return
-    print(f"(stub) would generate {len(sources)} entries")
+    print(f"Generated {len(sources)} OpenCode skills in .opencode/skills")
 
 
 if __name__ == "__main__":
