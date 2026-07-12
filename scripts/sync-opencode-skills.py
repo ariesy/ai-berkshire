@@ -99,12 +99,17 @@ def skill_frontmatter(name: str, description: str) -> str:
     )
 
 
-def skill_content(name: str, source: Path) -> str:
+def _extract_description_and_body(source: Path, name: str) -> tuple[str, str]:
     text = source.read_text(encoding="utf-8")
     front, body = split_frontmatter(text)
     description_source = front if front is not None else text
     description = first_heading(description_source, name)
     body_text = body if front is not None else text
+    return description, body_text
+
+
+def skill_content(name: str, source: Path) -> str:
+    description, body_text = _extract_description_and_body(source, name)
     note = ADAPTER_NOTE_TEMPLATE.format(name=name)
     return skill_frontmatter(name, description) + note + body_text.lstrip("\n").rstrip() + "\n"
 
@@ -112,6 +117,46 @@ def skill_content(name: str, source: Path) -> str:
 def write_skill(name: str, source: Path, *, check: bool) -> bool:
     content = skill_content(name, source)
     dst = OPENCODE_DST / "skills" / name / "SKILL.md"
+    if check:
+        if not dst.exists() or dst.read_text(encoding="utf-8") != content:
+            print(f"  {dst.relative_to(ROOT)}")
+            return True
+        return False
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    dst.write_text(content, encoding="utf-8")
+    return False
+
+
+COMMAND_AGENT_OVERRIDES: dict[str, str] = {
+    # investment-team and earnings-team orchestrate other agents, so they
+    # must run as the primary build agent rather than a subagent.
+}
+
+
+def command_frontmatter(name: str, description: str, agent: str) -> str:
+    return (
+        "---\n"
+        f"description: {yaml_quote(description)}\n"
+        f"agent: {agent}\n"
+        "---\n\n"
+    )
+
+
+def command_content(name: str, source: Path) -> str:
+    description, body_text = _extract_description_and_body(source, name)
+    agent = COMMAND_AGENT_OVERRIDES.get(name, "build")
+    note = ADAPTER_NOTE_TEMPLATE.format(name=name)
+    return (
+        command_frontmatter(name, description, agent)
+        + note
+        + body_text.lstrip("\n").rstrip()
+        + "\n"
+    )
+
+
+def write_command(name: str, source: Path, *, check: bool) -> bool:
+    content = command_content(name, source)
+    dst = OPENCODE_DST / "commands" / f"{name}.md"
     if check:
         if not dst.exists() or dst.read_text(encoding="utf-8") != content:
             print(f"  {dst.relative_to(ROOT)}")
@@ -130,19 +175,29 @@ def main() -> None:
     sources = discover_sources()
     if not check:
         (OPENCODE_DST / "skills").mkdir(parents=True, exist_ok=True)
+        (OPENCODE_DST / "commands").mkdir(parents=True, exist_ok=True)
     drifted: list[str] = []
     for name, source in sources:
         if write_skill(name, source, check=check):
             drifted.append(name)
+        if write_command(name, source, check=check):
+            drifted.append(name)
     if check:
         if drifted:
-            print(f"OpenCode skills are out of date ({len(drifted)} entries):")
+            print(f"OpenCode artifacts are out of date ({len(drifted)} entries):")
             for n in drifted:
                 print(f"  .opencode/skills/{n}/SKILL.md")
+                print(f"  .opencode/commands/{n}.md")
             raise SystemExit(1)
-        print(f"Checked {len(sources)} OpenCode skills in .opencode/skills")
+        print(
+            f"Checked {len(sources)} OpenCode entries "
+            f"({len(sources)} skills, {len(sources)} commands)"
+        )
         return
-    print(f"Generated {len(sources)} OpenCode skills in .opencode/skills")
+    print(
+        f"Generated {len(sources)} OpenCode entries "
+        f"({len(sources)} skills, {len(sources)} commands)"
+    )
 
 
 if __name__ == "__main__":
