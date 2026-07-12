@@ -14,6 +14,9 @@
 
 - **Spec 文档**:`docs/superpowers/specs/2026-07-12-opencode-support-design.md` —— 所有 D1-D8 决策的权威源。
 - **Python stdlib only**:不引入 `pip install` 依赖,沿用 `tools/` 和 `scripts/` 现有约定。
+  - **例外**:Task 7 Step 6 的 frontmatter 解析测试允许 `import yaml`(`pyyaml`),
+    因为用正则手撕 YAML 容易在引号/转义上出错。这是测试代码的唯一样板例外,
+    不影响 `sync-opencode-skills.py` 本身(脚本仍用 stdlib)。
 - **零项目级 opencode.json**:只提交 `opencode.example.json`;用户的真实配置从 example 复制,gitignored。
 - **生成产物 commit**:`.opencode/skills/` 与 `.opencode/commands/` 入库,与 `codex-skills/`、`codex-prompts/` 约定一致。
 - **分支**:`feature/opencode`,从 `main` HEAD 拉出(`git log --oneline -1 main` 应为 `459c0c2`)。
@@ -38,8 +41,8 @@ scripts/
 │   ├── financial-analyst.md
 │   ├── industry-researcher.md
 │   └── risk-assessor.md
-├── skills/<name>/SKILL.md           # 19 个生成产物
-└── commands/<name>.md               # 19 个生成产物
+├── skills/<name>/SKILL.md           # 20 个生成产物(19 skills + 1 codex-only)
+└── commands/<name>.md               # 20 个生成产物
 
 opencode.example.json                # 配置模板
 docs/superpowers/plans/
@@ -70,7 +73,8 @@ opencode.json                        # 用户从 example 复制
 - Create: `scripts/sync-opencode-skills.py`
 
 **Interfaces:**
-- Produces: 模块 `sync_opencode_skills` 含 `discover_sources() -> list[tuple[str, Path]]`、`split_frontmatter(text) -> tuple[str|None, str]`、`first_heading(text, fallback) -> str`、`yaml_quote(value) -> str`
+- Produces: 模块 `sync_opencode_skills` 含 `discover_sources() -> list[tuple[str, Path]]`、`split_frontmatter(text) -> tuple[str|None, str]`、`first_heading(text, fallback) -> str`、`yaml_quote(value) -> str`。
+  注:`skill_content()` 与 `command_content()`(分别在 Task 2、Task 3)重复了 frontmatter 解析 + description/body 提取。**Implementer 允许**抽取共享 helper(如 `_extract_description_and_body(source)`),以减少 DRY 违规。这是 plan 允许的实现细节调整。
 
 - [ ] **Step 1: 创建脚本骨架**
 
@@ -85,7 +89,7 @@ Single sync script that produces:
   - .opencode/commands/<name>.md           (slash command frontmatter)
 
 Sources (in order of precedence):
-  1. skills/*.md                            (canonical, 18 files)
+  1. skills/*.md                            (canonical, 19 files)
   2. codex-skills/<name>/SKILL.md           (only codex-only hand-written packages,
                                             e.g. investment-memo-craft; the agents/
                                             subdirectory is dropped for OpenCode)
@@ -147,7 +151,7 @@ def discover_sources() -> list[tuple[str, Path]]:
     """Yield (name, source_path) for every skill to generate, sorted by name.
 
     Sources:
-      1. skills/*.md (18 files; canonical Claude Code skills)
+      1. skills/*.md (19 files; canonical Claude Code skills)
       2. codex-skills/<name>/SKILL.md for any name not already covered
          (currently only investment-memo-craft)
     """
@@ -192,7 +196,7 @@ Run:
 chmod +x scripts/sync-opencode-skills.py
 python3 scripts/sync-opencode-skills.py
 ```
-Expected output: `(stub) would generate 19 entries`
+Expected output: `(stub) would generate 20 entries`
 
 - [ ] **Step 3: 验证源解析数量**
 
@@ -202,11 +206,11 @@ python3 -c "
 import sys; sys.path.insert(0, 'scripts')
 from sync_opencode_skills import discover_sources
 sources = discover_sources()
-assert len(sources) == 19, f'expected 19, got {len(sources)}'
+assert len(sources) == 20, f'expected 20, got {len(sources)}'
 print('OK:', sorted(n for n, _ in sources))
 "
 ```
-Expected: `OK: ['bottleneck-hunter', 'deep-company-series', ..., 'wechat-article']`(19 个,字典序)
+Expected: `OK: ['bottleneck-hunter', 'deep-company-series', ..., 'wechat-article', 'investment-memo-craft']`(20 个,字典序;investment-memo-craft 排在末尾因 name 字典序靠后)
 
 - [ ] **Step 4: 验证 memo-craft 来自 codex-skills**
 
@@ -229,7 +233,7 @@ Expected: `OK: memo-craft sourced from codex-skills/`
 git add scripts/sync-opencode-skills.py
 git commit -m "新增 sync-opencode-skills.py 骨架与源解析
 
-discover_sources() 双路径扫描 skills/*.md (18 个) +
+discover_sources() 双路径扫描 skills/*.md (19 个) + codex-skills/investment-memo-craft (1 个),共 20 个。
 codex-skills/<name>/SKILL.md (1 个, 仅 investment-memo-craft)。
 
 main() 当前是 stub,后续 task 逐步加 SKILL.md/commands 生成、
@@ -315,7 +319,7 @@ Run:
 ```bash
 python3 scripts/sync-opencode-skills.py
 ```
-Expected: `Generated 19 OpenCode skills in .opencode/skills`
+Expected: `Generated 20 OpenCode skills in .opencode/skills`
 
 - [ ] **Step 3: 验证文件数**
 
@@ -323,7 +327,7 @@ Run:
 ```bash
 find .opencode/skills -name SKILL.md | wc -l
 ```
-Expected: `19`
+Expected: `20`
 
 - [ ] **Step 4: 验证 frontmatter 与 adapter note**
 
@@ -346,7 +350,7 @@ Run:
 ```bash
 python3 scripts/sync-opencode-skills.py --check
 ```
-Expected: `Checked 19 OpenCode skills in .opencode/skills`,exit 0。
+Expected: `Checked 20 OpenCode skills in .opencode/skills`,exit 0。
 
 - [ ] **Step 6: 验证 --check 检测 drift**
 
@@ -482,7 +486,7 @@ Run:
 ```bash
 python3 scripts/sync-opencode-skills.py
 ```
-Expected: `Generated 19 OpenCode entries (19 skills, 19 commands)`
+Expected: `Generated 20 OpenCode entries (20 skills, 20 commands)`
 
 - [ ] **Step 3: 验证 commands 文件**
 
@@ -492,7 +496,7 @@ find .opencode/commands -name "*.md" | wc -l
 head -10 .opencode/commands/investment-team.md
 ```
 Expected:
-- `19`
+- `20`
 - frontmatter 含 `agent: build` 和 `description: "<标题>"`
 
 - [ ] **Step 4: --check 干净**
@@ -666,7 +670,7 @@ ls .opencode/commands/ | wc -l
 Expected:
 - `skills cleaned OK`
 - `commands cleaned OK`
-- `19` 和 `19`
+- `20` 和 `20`
 
 - [ ] **Step 5: --check 不报 stale(因为已清干净)**
 
@@ -753,7 +757,7 @@ OPENCODE_HOME="$(mktemp -d)" bash scripts/install-opencode.sh
 find "$OPENCODE_HOME" -name "SKILL.md" | wc -l
 find "$OPENCODE_HOME" -name "*.md" -path "*/commands/*" | wc -l
 ```
-Expected: `19` 和 `19`。
+Expected: `20` 和 `20`。
 
 - [ ] **Step 4: 验证 install 是幂等的(再跑一次)**
 
@@ -1233,7 +1237,7 @@ grep -c opencode.json .gitignore
 Expected:
 - 2 个脚本文件
 - 4 个 agent 文件
-- `19` skills, `19` commands
+- `20` skills, `20` commands
 - `opencode.example.json` 存在
 - `grep -c` 返回 `1`(忽略了一行)
 

@@ -49,8 +49,8 @@ scripts/
 │   ├── financial-analyst.md         # 巴菲特视角
 │   ├── industry-researcher.md       # 芒格视角
 │   └── risk-assessor.md             # 李录视角
-├── skills/<name>/SKILL.md           # 生成产物,19 个
-└── commands/<name>.md               # 生成产物,19 个
+├── skills/<name>/SKILL.md           # 生成产物,20 个
+└── commands/<name>.md               # 生成产物,20 个
 
 opencode.example.json                # 配置模板
 docs/superpowers/specs/
@@ -85,9 +85,9 @@ python3 scripts/sync-opencode-skills.py --check  # 校验模式,drift 则 exit 1
 
 ```python
 discover_sources():
-    1. 扫 skills/*.md                                # 18 个
+    1. 扫 skills/*.md                                # 19 个
     2. 扫 codex-skills/<name>/SKILL.md (排除 #1)     # 1 个(仅 investment-memo-craft)
-    3. 按 name 字典序返回 19 个 (name, source_path)
+    3. 按 name 字典序返回 20 个 (name, source_path)
 ```
 
 ### SKILL.md 生成模板
@@ -393,7 +393,7 @@ Windows 版 `.bat` 为 stretch goal,本期可选。
 1. `python3 scripts/sync-opencode-skills.py --check` exit 0
 2. `python3 scripts/sync-codex-skills.py --check` exit 0(回归)
 3. `python3 scripts/sync-codex-prompts.py --check` exit 0(回归)
-4. `.opencode/skills/` 共 19 个 SKILL.md,`.opencode/commands/` 共 19 个 .md
+4. `.opencode/skills/` 共 20 个 SKILL.md,`.opencode/commands/` 共 20 个 .md
 5. `codex-skills/investment-memo-craft/` 有 `agents/`,`.opencode/skills/investment-memo-craft/` 无 `agents/`
 
 ### 动态验证(stretch,需 OpenCode TUI 环境)
