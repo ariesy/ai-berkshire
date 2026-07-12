@@ -174,6 +174,30 @@ def write_command(name: str, source: Path, *, check: bool) -> bool:
     return False
 
 
+def cleanup_stale(sources: list[tuple[str, Path]]) -> list[str]:
+    """Remove .opencode/skills/<name>/ and .opencode/commands/<name>.md
+    for any name not in `sources`. Returns list of removed paths."""
+    valid = {name for name, _ in sources}
+    removed: list[str] = []
+
+    skills_dir = OPENCODE_DST / "skills"
+    if skills_dir.exists():
+        for entry in sorted(skills_dir.iterdir()):
+            if entry.is_dir() and entry.name not in valid:
+                import shutil
+                shutil.rmtree(entry)
+                removed.append(str(entry.relative_to(ROOT)))
+
+    commands_dir = OPENCODE_DST / "commands"
+    if commands_dir.exists():
+        for entry in sorted(commands_dir.iterdir()):
+            if entry.is_file() and entry.suffix == ".md" and entry.stem not in valid:
+                entry.unlink()
+                removed.append(str(entry.relative_to(ROOT)))
+
+    return removed
+
+
 def main() -> None:
     check = "--check" in sys.argv[1:]
     unknown = [a for a in sys.argv[1:] if a != "--check"]
@@ -189,6 +213,12 @@ def main() -> None:
             drifted.append(name)
         if write_command(name, source, check=check):
             drifted.append(name)
+    if not check:
+        removed = cleanup_stale(sources)
+        if removed:
+            print(f"Removed {len(removed)} stale entries:")
+            for path in removed:
+                print(f"  {path}")
     if check:
         if drifted:
             print(f"OpenCode artifacts are out of date ({len(drifted)} entries):")
