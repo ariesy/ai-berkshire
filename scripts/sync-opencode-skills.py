@@ -134,10 +134,7 @@ def write_skill(name: str, source: Path, *, check: bool) -> bool:
     return False
 
 
-COMMAND_AGENT_OVERRIDES: dict[str, str] = {
-    # investment-team and earnings-team orchestrate other agents, so they
-    # must run as the primary build agent rather than a subagent.
-}
+# If future skills need a non-build agent, reintroduce COMMAND_AGENT_OVERRIDES here.
 
 
 def command_frontmatter(name: str, description: str, agent: str) -> str:
@@ -151,7 +148,7 @@ def command_frontmatter(name: str, description: str, agent: str) -> str:
 
 def command_content(name: str, source: Path) -> str:
     description, body_text = _extract_description_and_body(source, name)
-    agent = COMMAND_AGENT_OVERRIDES.get(name, "build")
+    agent = "build"
     note = ADAPTER_NOTE_TEMPLATE.format(name=name)
     return (
         command_frontmatter(name, description, agent)
@@ -216,12 +213,15 @@ def main() -> None:
     if not check:
         removed = cleanup_stale(sources)
         if removed:
-            print(f"Removed {len(removed)} stale entries:")
+            print(f"Removed {len(removed)} stale {'entry' if len(removed) == 1 else 'entries'}:")
             for path in removed:
                 print(f"  {path}")
     if check:
         if drifted:
-            print(f"OpenCode artifacts are out of date ({len(drifted)} entries):")
+            print(
+                f"OpenCode artifacts are out of date "
+                f"({len(drifted)} {'entry' if len(drifted) == 1 else 'entries'}):"
+            )
             for n in drifted:
                 print(f"  .opencode/skills/{n}/SKILL.md")
                 print(f"  .opencode/commands/{n}.md")
