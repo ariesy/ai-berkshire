@@ -114,6 +114,13 @@ def skill_content(name: str, source: Path) -> str:
     return skill_frontmatter(name, description) + note + body_text.lstrip("\n").rstrip() + "\n"
 
 
+# Note on codex-only hand-written packages (e.g. investment-memo-craft):
+# discover_sources() points at codex-skills/investment-memo-craft/SKILL.md
+# but write_skill() only writes a single SKILL.md into .opencode/skills/<name>/.
+# The agents/openai.yaml sidecar (Codex agent picker metadata) is therefore
+# never copied to OpenCode, which is the intended behavior per spec D5.
+
+
 def write_skill(name: str, source: Path, *, check: bool) -> bool:
     content = skill_content(name, source)
     dst = OPENCODE_DST / "skills" / name / "SKILL.md"
