@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""A股数据工具 — 腾讯行情 + 东方财富搜索/财务，零外部依赖（仅 stdlib）。
+"""A股数据工具 — TDX离线数据(优先) + 腾讯行情 + 东方财富搜索/财务，零外部依赖（仅 stdlib）。
 
-为 Claude Code Skills 提供 A 股实时行情、财务数据等数据。
-设计原则：独立模块，不影响现有工具；使用 curl 直连绕过系统代理。
+数据源优先级:
+  1. tdx-chronos 离线数据 (/app/tdx-chronos) — K线+财务三表+股本, 零网络
+  2. 腾讯行情 API (qt.gtimg.cn) — 实时报价+PE/PB/市值, 稳定免费
+  3. 东方财富 datacenter API — 财务数据回退, 近5年年报
 
-用法（由 Skills 自动调用）：
-    python3.11 tools/ashare_data.py quote 600519                    # 实时行情
-    python3.11 tools/ashare_data.py financials 600519               # 核心财务数据（近5年）
-    python3.11 tools/ashare_data.py valuation 600519                # 估值指标
-    python3.11 tools/ashare_data.py search 茅台                      # 搜索股票代码
+用法（由 Skills 自动调用）:
+    python3 tools/ashare_data.py quote 600519                    # 实时行情
+    python3 tools/ashare_data.py financials 600519               # 核心财务数据（优先TDX）
+    python3 tools/ashare_data.py financials 600519 --offline     # 仅TDX离线数据
+    python3 tools/ashare_data.py valuation 600519                # 估值指标（优先TDX）
+    python3 tools/ashare_data.py search 茅台                      # 搜索股票代码
 
 需要 Python >= 3.8，零外部依赖。
 """
@@ -21,6 +24,36 @@ import sys
 from decimal import Decimal, ROUND_HALF_EVEN
 
 _TIMEOUT = 15
+_TDX_QUERY = "/app/tdx-chronos/scripts/query.py"
+_TDX_VENV = "/app/tdx-chronos/.venv/bin/python"
+
+
+def _tdx_available() -> bool:
+    """Check if tdx-chronos CLI is ready."""
+    return os.path.exists(_TDX_QUERY) and os.path.exists(_TDX_VENV)
+
+
+def _tdx_run(command: str, *args: str) -> dict | list:
+    """Call tdx-chronos CLI and return parsed JSON."""
+    cmd = [_TDX_VENV, _TDX_QUERY, command] + list(args)
+    try:
+        proc = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=60,
+        )
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return {"error": "tdx unavailable"}
+
+    if proc.returncode != 0:
+        return {"error": proc.stderr.strip() or f"exit {proc.returncode}"}
+
+    stdout = proc.stdout.strip()
+    if not stdout:
+        return {"error": "empty response"}
+
+    try:
+        return json.loads(stdout)
+    except json.JSONDecodeError:
+        return {"error": "json parse failed"}
 
 
 def _curl(url):
@@ -155,45 +188,84 @@ def cmd_quote(code: str):
     print(f"  52周最低:   {d['low_52w']}")
 
 
-def cmd_valuation(code: str):
-    """估值指标汇总。"""
-    qq_code = _qq_code(code)
-    raw = _curl(f"https://qt.gtimg.cn/q={qq_code}")
-    d = _parse_qq_quote(raw)
-    if not d:
-        print(f"❌ 未找到股票 {code}")
+def cmd_financials(code: str):
+    """近5年核心财务数据 — TDX优先, Eastmoney回退."""
+    if _tdx_available():
+        print("=" * 60)
+        print(f"核心财务数据: {code} (TDX 离线数据)")
+        print("=" * 60)
+        _tdx_financials(code)
         return
 
-    price = d["price"]
-    market_cap_yi = d["market_cap"]
-
-    print("=" * 60)
-    print(f"估值指标: {d['name']} ({d['code']})")
-    print("=" * 60)
-    print(f"  当前价:     {price}")
-    print(f"  总市值:     {market_cap_yi}亿")
-    print(f"  流通市值:   {d['float_cap']}亿")
-    print(f"  PE(动):     {d['pe']}")
-    print(f"  PB:         {d['pb']}")
-    print(f"  52周最高:   {d['high_52w']}")
-    print(f"  52周最低:   {d['low_52w']}")
-
-    # 市值验算
-    try:
-        p = Decimal(price)
-        cap = Decimal(market_cap_yi) * Decimal("1e8")
-        shares = cap / p
-        print(f"\n  推算总股本: {_fmt_yi(float(shares))}股")
-        calc_cap = p * shares
-        reported_cap = Decimal(market_cap_yi) * Decimal("1e8")
-        diff = abs(calc_cap - reported_cap) / reported_cap * 100
-        print(f"  市值验算:   ✅ 一致（推算法，偏差 {float(diff):.1f}%）")
-    except Exception:
-        pass
+    # Fallback to Eastmoney
+    _eastmoney_financials(code)
 
 
-def cmd_financials(code: str):
-    """近5年核心财务数据。"""
+def _tdx_financials(code: str):
+    """Display multi-year financial data from TDX."""
+    data = _tdx_run("financials", code)
+    if isinstance(data, dict) and "error" in data:
+        print(f"  ⚠️ TDX 数据不可用: {data['error']}")
+        print("  回退到东方财富...")
+        _eastmoney_financials(code)
+        return
+
+    if not data or not isinstance(data, list):
+        print("  无财务数据。")
+        return
+
+    # Filter annual reports
+    key_fields = [
+        ("营业总收入(万元)", "营收(亿)"),
+        ("近一年归母净利润（万元）", "归母净利(亿)"),
+        ("基本每股收益", "EPS"),
+        ("每股净资产", "BPS"),
+        ("净资产收益率", "ROE(%)"),
+        ("销售毛利率(%)(非金融类指标)", "毛利率(%)"),
+        ("销售净利率(%)", "净利率(%)"),
+        ("净利润增长率(%)", "利润增速(%)"),
+    ]
+
+    annual_rows = []
+    for row in data:
+        rd = str(row.get("report_date", ""))
+        if not rd.endswith("1231"):
+            continue
+        year = rd[:4]
+        vals = []
+        for col, _ in key_fields:
+            v = row.get(col)
+            if v is not None:
+                if "万元" in col:
+                    vals.append(f"{float(v)/10000:.2f}亿")
+                elif "%" in col or "率" in col:
+                    vals.append(f"{float(v):.2f}%")
+                else:
+                    vals.append(f"{float(v):.4f}")
+            else:
+                vals.append("-")
+        if vals:
+            annual_rows.append([year] + vals)
+
+    if not annual_rows:
+        print("  无年报数据。")
+        return
+
+    headers = ["年份"] + [label for _, label in key_fields]
+    col_widths = [len(h) for h in headers]
+    for row in annual_rows:
+        for i, cell in enumerate(row):
+            col_widths[i] = max(col_widths[i], len(str(cell)))
+    sep = "  "
+    header_line = sep.join(h.ljust(col_widths[i]) for i, h in enumerate(headers))
+    print(header_line)
+    print(sep.join("-" * w for w in col_widths))
+    for row in annual_rows:
+        print(sep.join(str(row[i]).ljust(col_widths[i]) for i in range(len(headers))))
+
+
+def _eastmoney_financials(code: str):
+    """Original Eastmoney-based financials (fallback)."""
     qq_code = _qq_code(code)
     raw = _curl(f"https://qt.gtimg.cn/q={qq_code}")
     d = _parse_qq_quote(raw)
@@ -202,7 +274,6 @@ def cmd_financials(code: str):
     code_clean = code.strip().replace(".SH", "").replace(".SZ", "").replace(".BJ", "")
     market = "SH" if code_clean.startswith(("6", "9", "5")) else "SZ"
 
-    # 东方财富 datacenter API（年报数据）
     fin_url = "https://datacenter.eastmoney.com/securities/api/data/get"
     params = {
         "type": "RPT_F10_FINANCE_MAINFINADATA",
@@ -222,7 +293,6 @@ def cmd_financials(code: str):
     except Exception:
         pass
 
-    # 如果年报筛选无结果，去掉年报限制
     if not reports:
         params["filter"] = f'(SECUCODE="{code_clean}.{market}")'
         try:
@@ -236,7 +306,7 @@ def cmd_financials(code: str):
     print("=" * 60)
 
     if not reports:
-        print("  ⚠️ 未能获取财务数据，建议通过 WebSearch 补充")
+        print("  ⚠️ 未能获取财务数据，建议通过 TDX 离线数据或 WebSearch 补充")
         return
 
     for r in reports[:5]:
@@ -265,6 +335,87 @@ def cmd_financials(code: str):
             print(f"  每股净资产:     {bps:.2f}")
         if roe is not None:
             print(f"  ROE(加权):      {_fmt_pct(roe)}")
+
+
+def cmd_valuation(code: str):
+    """估值指标 — TDX优先, QQ行情回退."""
+    if _tdx_available():
+        data = _tdx_run("valuation", code)
+        if isinstance(data, dict) and "error" not in data:
+            _tdx_valuation_display(code, data)
+            return
+
+    # Fallback to QQ quote
+    _qq_valuation(code)
+
+
+def _tdx_valuation_display(code: str, d: dict):
+    """Display TDX valuation snapshot."""
+    print("=" * 60)
+    print(f"估值指标: {d.get('symbol', code)} (TDX 离线数据 · 财年{d.get('fin_date', '')})")
+    print("=" * 60)
+    print(f"  股价:         {d.get('price', '-')} 元")
+    if d.get('market_cap_yi'):
+        print(f"  总市值:       {d['market_cap_yi']:.2f}亿")
+    if d.get('total_shares_yi'):
+        print(f"  总股本:       {d['total_shares_yi']:.2f}亿股")
+    print(f"  PE(TTM):      {d.get('pe', '-')}")
+    print(f"  PB:           {d.get('pb', '-')}")
+    if d.get('roe_pct'):
+        print(f"  ROE:          {d['roe_pct']:.2f}%")
+    print(f"  盈利收益率:   {d.get('earnings_yield_pct', '-')}%")
+    if d.get('dividend_per_share'):
+        print(f"  股息率:       {d.get('dividend_yield_pct', '-')}%")
+    print(f"  营收增速:     {d.get('rev_growth_pct', '-')}%")
+    print(f"  利润增速:     {d.get('np_growth_pct', '-')}%")
+    print(f"  EPS:          {d.get('eps', '-')} 元")
+    print(f"  BPS:          {d.get('bps', '-')} 元")
+    print(f"  毛利率:       {d.get('gross_margin_pct', '-')}%")
+    print(f"  净利率:       {d.get('net_margin_pct', '-')}%")
+    if d.get('revenue_wan'):
+        print(f"  营收:         {float(d['revenue_wan'])/10000:.2f}亿")
+    if d.get('net_profit_wan'):
+        print(f"  归母净利:     {float(d['net_profit_wan'])/10000:.2f}亿")
+    if d.get('debt_ratio_pct'):
+        print(f"  资产负债率:   {d['debt_ratio_pct']:.2f}%")
+    if d.get('op_cf_per_share'):
+        print(f"  每股经营现金流: {d['op_cf_per_share']} 元")
+
+
+def _qq_valuation(code: str):
+    """Original QQ quote-based valuation (fallback)."""
+    qq_code = _qq_code(code)
+    raw = _curl(f"https://qt.gtimg.cn/q={qq_code}")
+    d = _parse_qq_quote(raw)
+    if not d:
+        print(f"❌ 未找到股票 {code}")
+        return
+
+    price = d["price"]
+    market_cap_yi = d["market_cap"]
+
+    print("=" * 60)
+    print(f"估值指标: {d['name']} ({d['code']}) (QQ行情)")
+    print("=" * 60)
+    print(f"  当前价:     {price}")
+    print(f"  总市值:     {market_cap_yi}亿")
+    print(f"  流通市值:   {d['float_cap']}亿")
+    print(f"  PE(动):     {d['pe']}")
+    print(f"  PB:         {d['pb']}")
+    print(f"  52周最高:   {d['high_52w']}")
+    print(f"  52周最低:   {d['low_52w']}")
+
+    try:
+        p = Decimal(price)
+        cap = Decimal(market_cap_yi) * Decimal("1e8")
+        shares = cap / p
+        print(f"\n  推算总股本: {_fmt_yi(float(shares))}股")
+        calc_cap = p * shares
+        reported_cap = Decimal(market_cap_yi) * Decimal("1e8")
+        diff = abs(calc_cap - reported_cap) / reported_cap * 100
+        print(f"  市值验算:   ✅ 一致（推算法，偏差 {float(diff):.1f}%）")
+    except Exception:
+        pass
 
 
 def cmd_search(keyword: str):

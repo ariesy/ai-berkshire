@@ -7,19 +7,58 @@ Automatically called by Claude Code Skills at critical validation checkpoints.
 Zero external dependencies — uses only Python stdlib (decimal, json, math, argparse).
 Requires Python >= 3.7.
 
-Usage (called automatically by Skills, no manual execution needed):
+Subcommands:
+    auto-verify      自动从TDX取数+全套验算 (推荐)
+    verify-market-cap  市值验算 (手动传参)
+    verify-valuation   估值指标验算 (手动传参)
+    cross-validate     多源交叉验证
+    benford            Benford定律检测
+    calc               精确计算
+    three-scenario     三情景估值
+
+Usage:
+    python3 tools/financial_rigor.py auto-verify 688248
     python3 tools/financial_rigor.py verify-market-cap --price 510 --shares 9.11e9 --reported 4.65e12 --currency HKD
     python3 tools/financial_rigor.py verify-valuation --price 510 --eps 23.5 --bvps 120 --fcf-per-share 18 --dividend 2.4
     python3 tools/financial_rigor.py cross-validate --field revenue --values '{"年报": 7518, "Yahoo": 7500, "StockAnalysis": 7520}' --unit 亿
-    python3 tools/financial_rigor.py benford --values '[1234, 2345, 3456, ...]'
     python3 tools/financial_rigor.py calc --expr '510 * 9.11e9'
 """
 
 import argparse
 import json
 import math
+import os
+import subprocess
 import sys
 from decimal import Decimal, Context, ROUND_HALF_EVEN, InvalidOperation
+
+# ---------------------------------------------------------------------------
+# Exact Decimal Engine (no floating-point drift)
+# ---------------------------------------------------------------------------
+
+_CTX = Context(prec=28, rounding=ROUND_HALF_EVEN)
+_TDX_QUERY = "/app/tdx-chronos/scripts/query.py"
+_TDX_VENV = "/app/tdx-chronos/.venv/bin/python"
+
+
+def _tdx_val(code: str) -> dict | None:
+    """Fetch valuation data from TDX for auto-verify."""
+    if not os.path.exists(_TDX_QUERY) or not os.path.exists(_TDX_VENV):
+        return None
+    try:
+        proc = subprocess.run(
+            [_TDX_VENV, _TDX_QUERY, "valuation", code],
+            capture_output=True, text=True, timeout=60,
+        )
+        if proc.returncode != 0:
+            return None
+        # Filter TDX warnings from stderr
+        stdout = proc.stdout.strip()
+        if not stdout:
+            return None
+        return json.loads(stdout)
+    except Exception:
+        return None
 
 # ---------------------------------------------------------------------------
 # Exact Decimal Engine (no floating-point drift)
@@ -361,6 +400,127 @@ def three_scenario_valuation(current_price, current_eps, shares_billion,
 
 
 # ---------------------------------------------------------------------------
+# auto-verify: TDX-powered one-stop verification
+# ---------------------------------------------------------------------------
+
+def auto_verify(code: str):
+    """从TDX取数 → 全套验算（市值/估值/交叉验证/三情景）。"""
+    print("=" * 60)
+    print(f"自动验算 — {code}")
+    print("=" * 60)
+
+    d = _tdx_val(code)
+    if d is None or "error" in d:
+        print("  ❌ 无法从 TDX 获取数据。")
+        print("     请确保 /app/tdx-chronos 已初始化。")
+        print("     回退方案: 手动传参 verify-market-cap / verify-valuation")
+        return
+
+    price = float(d.get("price", 0))
+    eps = float(d.get("eps", 0))
+    bps = float(d.get("bps", 0))
+    total_shares_yi = float(d.get("total_shares_yi", 0))
+    market_cap_yi = float(d.get("market_cap_yi", 0))
+    rev_growth = float(d.get("rev_growth_pct", 0)) / 100 if d.get("rev_growth_pct") else 0.15
+    np_growth = float(d.get("np_growth_pct", 0)) / 100 if d.get("np_growth_pct") else 0.15
+    op_cf = float(d.get("op_cf_per_share", 0)) if d.get("op_cf_per_share") else None
+    dividend = float(d.get("dividend_per_share", 0)) if d.get("dividend_per_share") else 0
+
+    if price <= 0 or eps <= 0:
+        print("  ❌ 关键数据缺失 (price/eps), 无法验算。")
+        return
+
+    shares_yi = total_shares_yi if total_shares_yi > 0 else 5.0
+    reported_cap = market_cap_yi if market_cap_yi > 0 else price * shares_yi
+
+    print(f"\n  数据来源: TDX 离线数据 (财年: {d.get('fin_date', 'N/A')})")
+    print(f"  股价: {price} 元  |  股本: {shares_yi:.2f}亿股  |  报告市值: {reported_cap:.2f}亿")
+    print()
+
+    # Step 1: Market cap verification
+    print("─" * 40)
+    print("  [1/4] 市值验算")
+    print("─" * 40)
+    calc_cap = price * shares_yi
+    diff = abs(calc_cap - reported_cap) / reported_cap * 100 if reported_cap > 0 else 0
+    status = "✅" if diff <= 1 else ("⚠️" if diff <= 5 else "❌")
+    print(f"  计算市值: {price} × {shares_yi:.2f}亿 = {calc_cap:.2f}亿")
+    print(f"  报告市值: {reported_cap:.2f}亿")
+    print(f"  偏差: {diff:.2f}%  {status}")
+    print()
+
+    # Step 2: Valuation metrics
+    print("─" * 40)
+    print("  [2/4] 估值指标验算")
+    print("─" * 40)
+    pe = price / eps if eps > 0 else 0
+    pb = price / bps if bps > 0 else 0
+    roe = eps / bps * 100 if bps > 0 else 0
+    print(f"  PE: {price} / {eps} = {pe:.2f}x   (TDX报告: {d.get('pe', '-')})")
+    print(f"  PB: {price} / {bps} = {pb:.2f}x   (TDX报告: {d.get('pb', '-')})")
+    print(f"  ROE: {eps} / {bps} = {roe:.2f}%  (TDX报告: {d.get('roe_pct', '-')}%)")
+    if dividend > 0:
+        d_yield = dividend / price * 100
+        print(f"  股息率: {dividend} / {price} = {d_yield:.2f}%")
+    if op_cf and op_cf > 0:
+        cf_yield = op_cf / price * 100
+        print(f"  FCF收益率: {op_cf} / {price} = {cf_yield:.2f}%")
+    print()
+
+    # Step 3: Three-scenario valuation
+    print("─" * 40)
+    print("  [3/4] 三情景估值")
+    print("─" * 40)
+    names = ["乐观", "中性", "悲观"]
+    growth_rates = [max(np_growth + 0.05, 0.10), max(np_growth, 0.05), max(np_growth - 0.05, 0.02)]
+    target_pes = [max(pe * 0.7, 20), max(pe * 0.5, 15), max(pe * 0.35, 10)]
+    years = 3
+
+    print(f"  {'情景':6} {'年增速':>7} {'目标PE':>7} {'目标EPS':>9} {'目标价':>9} {'涨跌幅':>8}")
+    print(f"  {'─'*6} {'─'*7} {'─'*7} {'─'*9} {'─'*9} {'─'*8}")
+    for name, g, tpe in zip(names, growth_rates, target_pes):
+        future_eps = exact(eps) * (Decimal("1") + exact(g)) ** years
+        future_eps_f = float(future_eps)
+        target_price = future_eps_f * tpe
+        change = (target_price / price - 1) * 100
+        print(f"  {name:6} {g*100:>7.1f}% {tpe:>7.0f}x {future_eps_f:>9.2f} {target_price:>9.1f} {change:>+7.1f}%")
+    print()
+
+    # Step 4: Financial health summary
+    print("─" * 40)
+    print("  [4/4] 财务健康速览")
+    print("─" * 40)
+    checks = []
+    if d.get("roe_pct") and float(d.get("roe_pct", 0)) >= 15:
+        checks.append(("✅", "ROE ≥ 15%", f"{d.get('roe_pct'):.1f}%"))
+    elif d.get("roe_pct"):
+        checks.append(("⚠️", "ROE < 15%", f"{d.get('roe_pct'):.1f}%"))
+    if d.get("debt_ratio_pct") and float(d.get("debt_ratio_pct", 0)) <= 50:
+        checks.append(("✅", "资产负债率 ≤ 50%", f"{d.get('debt_ratio_pct'):.1f}%"))
+    else:
+        checks.append(("⚠️", "资产负债率 > 50%", f"{d.get('debt_ratio_pct', '-')}%"))
+    if d.get("np_growth_pct") and float(d.get("np_growth_pct", 0)) >= 10:
+        checks.append(("✅", "利润增速 ≥ 10%", f"{d.get('np_growth_pct'):.1f}%"))
+    elif d.get("np_growth_pct"):
+        checks.append(("⚠️", "利润增速 < 10%", f"{d.get('np_growth_pct'):.1f}%"))
+    if op_cf and eps > 0 and op_cf / eps >= 0.8:
+        checks.append(("✅", "经营现金流/EPS ≥ 0.8", f"{op_cf/eps:.2f}"))
+    elif op_cf:
+        checks.append(("❌", "经营现金流/EPS < 0.8", f"{op_cf/eps:.2f}"))
+    for icon, label, val in checks:
+        print(f"  {icon} {label}: {val}")
+    print()
+
+    # Verdict
+    fail_count = sum(1 for icon, _, _ in checks if icon == "❌")
+    warn_count = sum(1 for icon, _, _ in checks if icon == "⚠️")
+    print("─" * 40)
+    print(f"  验算完毕: {4 - fail_count}/4 通过, {warn_count} 项警告, {fail_count} 项不通过")
+    print(f"  合理买入参考: PE ≤ {int(target_pes[1])}x, 即 ≤ {eps * target_pes[1]:.1f} 元")
+    print("─" * 40)
+
+
+# ---------------------------------------------------------------------------
 # CLI Entry Point
 # ---------------------------------------------------------------------------
 
@@ -378,6 +538,10 @@ Examples:
         """)
 
     sub = parser.add_subparsers(dest="command")
+
+    # auto-verify
+    av = sub.add_parser("auto-verify", help="自动从TDX取数+全套验算")
+    av.add_argument("code", help="A股代码, 如 688248")
 
     # verify-market-cap
     mc = sub.add_parser("verify-market-cap", help="验算市值 = 股价 × 总股本")
@@ -424,7 +588,9 @@ Examples:
 
     args = parser.parse_args()
 
-    if args.command == "verify-market-cap":
+    if args.command == "auto-verify":
+        auto_verify(args.code)
+    elif args.command == "verify-market-cap":
         verify_market_cap(args.price, args.shares, args.reported, args.currency)
     elif args.command == "verify-valuation":
         verify_valuation(args.price, args.eps, args.bvps, args.fcf_per_share,

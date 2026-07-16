@@ -2,9 +2,25 @@
 
 本规范适用于所有涉及企业财务数据的研究。**每个关键数据必须来自两个独立来源，误差>1%须标记。**
 
+> 数据工具速查:
+> - **A股**: `tools/tdx_data.py` (TDX 离线,优先) / `tools/ashare_data.py` (腾讯+东财,回退) / `tools/financial_rigor.py auto-verify` (一键验算)
+> - **美股/港股**: 仍走 WebFetch + 浏览器方式
+
 ---
 
 ## 数据源优先级
+
+### A股（科创板/主板/北交所 — 优先）
+
+| 优先级 | 来源 | 获取方式 | 覆盖 |
+|--------|------|---------|------|
+| **0（最优）** | **tdx-chronos 离线数据** | `python3 tools/tdx_data.py valuation 688248` 或 `python3 tools/ashare_data.py financials 688248` | 日K线(全历史)+财务三表(581字段×148季度)+股本变动, 零网络 |
+| 1（主） | **东方财富** | `python3 tools/ashare_data.py financials 688248` (无TDX时回退) | 近5年年报摘要 |
+| 2（副） | **巨潮资讯** | cninfo.com.cn | 原始年报/季报PDF |
+| 原始一手 | **TDX 官方数据** | tdx-chronos 直接从 data.tdx.com.cn 下载解析 | 通达信原始 .day/.dat 文件 |
+
+> **TDX优先策略**: 当 `/app/tdx-chronos` 可用时，所有A股财务数据优先从TDX离线获取（零网络延迟、581字段全量覆盖、历史深度达148季度）。TDX不可用时自动回退到东方财富网络API。
+> **一键验算**: `python3 tools/financial_rigor.py auto-verify <代码>` 自动从TDX取数 → 市值验算 → 估值验算 → 三情景估值 → 财务健康速览。
 
 ### 美股（PDD、腾讯ADR、网易ADR等）
 
@@ -21,13 +37,6 @@
 | 1（主） | **aastocks** | aastocks.com/tc/stocks/analysis/company-fundamental | 直接访问 |
 | 2（副） | **macrotrends**（ADR代码） | 腾讯用TCEHY，网易用NTES | 直接访问 |
 | 原始一手 | HKEX披露易 | hkexnews.hk | 年报PDF |
-
-### A股（三七互娱、吉比特等）
-
-| 优先级 | 来源 | URL | 获取方式 |
-|--------|------|-----|---------|
-| 1（主） | **东方财富** | eastmoney.com → 搜股票代码 → 财务报表 | 直接访问 |
-| 2（副） | **巨潮资讯** | cninfo.com.cn | 原始年报/季报PDF |
 
 ---
 
@@ -114,10 +123,34 @@
 
 | 场景 | 主要来源 | 备用来源 |
 |------|---------|---------|
+| A股（通用） | **`tools/tdx_data.py valuation <code>`** (TDX离线) | `tools/ashare_data.py` (东财网络) |
+| A股估值验算 | **`tools/financial_rigor.py auto-verify <code>`** | 手动传参验算 |
 | PDD / 拼多多 | macrotrends.net/stocks/charts/PDD | stockanalysis.com/stocks/pdd |
 | 腾讯 | macrotrends.net/stocks/charts/TCEHY | aastocks（0700.HK） |
 | 网易 | macrotrends.net/stocks/charts/NTES | aastocks（9999.HK） |
-| 三七互娱 | eastmoney.com（002555） | cninfo.com.cn |
-| 吉比特 | eastmoney.com（603444） | cninfo.com.cn |
+| 三七互娱 | `tools/tdx_data.py valuation 002555` | eastmoney.com（002555） |
+| 吉比特 | `tools/tdx_data.py valuation 603444` | eastmoney.com（603444） |
 | Nintendo | macrotrends.net/stocks/charts/NTDOY | stockanalysis.com/stocks/ntdoy |
 | Capcom | macrotrends（CCOEY） | stockanalysis（CCOEY） |
+
+### TDX 数据工具速查
+
+```bash
+# 估值全貌（K线+财报+股本）
+python3 tools/tdx_data.py valuation 688248
+
+# 历年财报对比
+python3 tools/tdx_data.py financials 688248
+
+# 历史K线
+python3 tools/tdx_data.py kline 688248 --limit 30
+
+# 搜索代码
+python3 tools/tdx_data.py search 688
+
+# 数据健康检查
+python3 tools/tdx_data.py health
+
+# 一键全套验算
+python3 tools/financial_rigor.py auto-verify 688248
+```
