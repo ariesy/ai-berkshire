@@ -1,0 +1,42 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["AGENTS.md", "ai_CLAUDE.md"],
+
+  "skills": {
+    "paths": [".opencode/skills"]
+  },
+
+  "permission": {
+    "edit": { "*": "ask", "reports/**/*.md": "allow", "tools/*.py": "allow" },
+    "write": { "*": "ask", "reports/**/*.md": "allow" },
+    "bash": {
+      "*": "ask",
+      "python3 tools/*": "allow",
+      "date": "allow",
+      "git status*": "allow",
+      "git log*": "allow",
+      "git diff*": "allow",
+      "python3 scripts/sync-*": "allow"
+    },
+    "webfetch": "allow",
+    "websearch": "allow",
+    "skill": "allow"
+  },
+
+  "agent": {
+    "build": {
+      "permission": {
+        "task": {
+          "*": "deny",
+          "business-analyst": "allow",
+          "financial-analyst": "allow",
+          "industry-researcher": "allow",
+          "risk-assessor": "allow",
+          "explore": "allow",
+          "general": "allow",
+          "scout": "allow"
+        }
+      }
+    }
+  }
+}

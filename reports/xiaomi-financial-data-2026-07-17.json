@@ -1,0 +1,367 @@
+{
+  "report_metadata": {
+    "company": "小米集团 (Xiaomi Corporation)",
+    "ticker": "1810.HK",
+    "data_cutoff_date": "2026-07-17",
+    "report_generated": "2026-07-17T12:21:18Z",
+    "primary_sources": [
+      "https://finance.yahoo.com/quote/1810.HK/",
+      "https://www.google.com/finance/quote/1810:HKG",
+      "https://query1.finance.yahoo.com/ws/fundamentals-timeseries/v1/finance/timeseries/1810.HK"
+    ],
+    "secondary_sources": [
+      "https://en.wikipedia.org/wiki/Xiaomi"
+    ],
+    "notes": [
+      "aastocks.com returned empty/JS-rendered content, could not extract data",
+      "macrotrends.net returned 403 (blocked), could not extract data",
+      "Revenues and earnings are in CNY (company reporting currency) unless otherwise noted",
+      "Stock price and market cap are in HKD (trading currency)",
+      "Data for FY2021-FY2025 from Yahoo Finance fundamentals timeseries API"
+    ]
+  },
+
+  "current_price_and_market_cap": {
+    "price_hkd": {
+      "value": 26.88,
+      "currency": "HKD",
+      "source": "https://www.google.com/finance/quote/1810:HKG",
+      "as_of": "2026-07-17 16:08 HKT",
+      "note": "Closing price"
+    },
+    "price_hkd_yahoo": {
+      "value": 27.20,
+      "currency": "HKD",
+      "source": "https://finance.yahoo.com/quote/1810.HK/",
+      "as_of": "2026-07-17 10:27 HKT",
+      "note": "Intraday price during market hours"
+    },
+    "market_cap_hkd": {
+      "value": 693110000000,
+      "value_formatted": "693.11B",
+      "currency": "HKD",
+      "source": "https://www.google.com/finance/quote/1810:HKG",
+      "as_of": "2026-07-17"
+    },
+    "market_cap_hkd_yahoo": {
+      "value": 705340000000,
+      "value_formatted": "705.34B",
+      "currency": "HKD",
+      "source": "https://finance.yahoo.com/quote/1810.HK/",
+      "as_of": "2026-07-16"
+    },
+    "52_week_range_hkd": {
+      "high": 59.90,
+      "low": 21.30,
+      "source": "https://finance.yahoo.com/quote/1810.HK/"
+    }
+  },
+
+  "total_shares": {
+    "shares_outstanding_google": {
+      "value": 15880000000,
+      "value_formatted": "15.88B",
+      "note": "Google Finance figure - may reflect only one class of shares",
+      "source": "https://www.google.com/finance/quote/1810:HKG"
+    },
+    "shares_outstanding_implied_yahoo": {
+      "value": 25650000000,
+      "value_formatted": "~25.65B",
+      "note": "Implied from Yahoo Market Cap 697.64B / price 27.20 = 25.65B total shares (Class A + Class B)",
+      "source": "https://finance.yahoo.com/quote/1810.HK/"
+    },
+    "note": "Xiaomi has dual-class share structure (Class A: 10 votes/share, Class B: 1 vote/share). Total shares outstanding estimate ~25B including both classes."
+  },
+
+  "revenue_and_net_income": {
+    "currency": "CNY",
+    "unit": "billions",
+    "source": "https://query1.finance.yahoo.com/ws/fundamentals-timeseries/v1/finance/timeseries/1810.HK",
+    "data": [
+      {
+        "fiscal_year": 2021,
+        "revenue": 328.31,
+        "net_income": 19.34,
+        "gross_profit": 58.26,
+        "operating_income": 20.03
+      },
+      {
+        "fiscal_year": 2022,
+        "revenue": 280.04,
+        "net_income": 2.47,
+        "gross_profit": 47.58,
+        "operating_income": 6.12
+      },
+      {
+        "fiscal_year": 2023,
+        "revenue": 270.97,
+        "net_income": 17.48,
+        "gross_profit": 57.48,
+        "operating_income": 14.77
+      },
+      {
+        "fiscal_year": 2024,
+        "revenue": 365.91,
+        "net_income": 23.66,
+        "gross_profit": 76.56,
+        "operating_income": 23.19
+      },
+      {
+        "fiscal_year": 2025,
+        "revenue": 457.29,
+        "net_income": 41.64,
+        "gross_profit": 101.81,
+        "operating_income": 31.54
+      }
+    ],
+    "ttm_data": {
+      "revenue": 445.13,
+      "net_income": 35.44,
+      "source": "https://finance.yahoo.com/quote/1810.HK/",
+      "currency": "CNY",
+      "period": "TTM (Q2 2025 through Q1 2026)"
+    }
+  },
+
+  "segment_revenue_breakdown": {
+    "status": "unavailable",
+    "note": "Segment revenue breakdown (Smartphones/IoT/Internet Services/Smart EV) could not be retrieved from accessible web sources. aastocks.com (primary HK source) returned JS-rendered content. Segment data requires accessing Xiaomi's annual report (20-F or HKEX filing) directly.",
+    "source_attempted": [
+      "https://www.aastocks.com/tc/stocks/analysis/company-fundamental/01810",
+      "https://www.aastocks.com/en/stocks/analysis/company-fundamental/01810/income-statement",
+      "https://www.reuters.com/markets/companies/1810.HK/financials/"
+    ]
+  },
+
+  "segment_gross_margins": {
+    "status": "unavailable",
+    "note": "Per-segment gross margin breakdown could not be retrieved from web sources"
+  },
+
+  "gross_margin_trend": {
+    "currency": "CNY",
+    "unit": "billions",
+    "source": "https://query1.finance.yahoo.com/ws/fundamentals-timeseries/v1/finance/timeseries/1810.HK",
+    "calculated": true,
+    "data": [
+      {
+        "fiscal_year": 2021,
+        "gross_profit": 58.26,
+        "revenue": 328.31,
+        "gross_margin_pct": 17.75
+      },
+      {
+        "fiscal_year": 2022,
+        "gross_profit": 47.58,
+        "revenue": 280.04,
+        "gross_margin_pct": 16.99
+      },
+      {
+        "fiscal_year": 2023,
+        "gross_profit": 57.48,
+        "revenue": 270.97,
+        "gross_margin_pct": 21.21
+      },
+      {
+        "fiscal_year": 2024,
+        "gross_profit": 76.56,
+        "revenue": 365.91,
+        "gross_margin_pct": 20.92
+      },
+      {
+        "fiscal_year": 2025,
+        "gross_profit": 101.81,
+        "revenue": 457.29,
+        "gross_margin_pct": 22.27
+      }
+    ]
+  },
+
+  "cash_and_debt": {
+    "currency": "CNY",
+    "unit": "billions",
+    "source": "https://query1.finance.yahoo.com/ws/fundamentals-timeseries/v1/finance/timeseries/1810.HK",
+    "data": [
+      {
+        "fiscal_year": 2022,
+        "cash_and_equivalents": 27.61,
+        "total_debt": 26.06,
+        "long_term_debt": 21.49,
+        "stockholders_equity": 143.66,
+        "total_assets": 273.51,
+        "current_assets": 160.41,
+        "current_liabilities": 89.63
+      },
+      {
+        "fiscal_year": 2023,
+        "cash_and_equivalents": 33.63,
+        "total_debt": 29.83,
+        "long_term_debt": 21.67,
+        "stockholders_equity": 164.00,
+        "total_assets": 324.25,
+        "current_assets": 199.05,
+        "current_liabilities": 115.59
+      },
+      {
+        "fiscal_year": 2024,
+        "cash_and_equivalents": 33.66,
+        "total_debt": 36.01,
+        "long_term_debt": 17.28,
+        "stockholders_equity": 188.74,
+        "total_assets": 403.16,
+        "current_assets": 225.71,
+        "current_liabilities": 175.38
+      },
+      {
+        "fiscal_year": 2025,
+        "cash_and_equivalents": 26.91,
+        "total_debt": 41.84,
+        "long_term_debt": 22.92,
+        "stockholders_equity": 266.22,
+        "total_assets": 508.10,
+        "current_assets": 254.81,
+        "current_liabilities": 192.41
+      }
+    ],
+    "total_cash_mrq": {
+      "value_formatted": "98.23B",
+      "note": "Includes cash, equivalents, and short-term investments. Currency unclear (likely CNY or HKD).",
+      "source": "https://finance.yahoo.com/quote/1810.HK/"
+    },
+    "debt_to_equity_mrq_pct": {
+      "value": 13.29,
+      "source": "https://finance.yahoo.com/quote/1810.HK/"
+    }
+  },
+
+  "free_cash_flow": {
+    "currency": "CNY",
+    "unit": "billions",
+    "source": "https://query1.finance.yahoo.com/ws/fundamentals-timeseries/v1/finance/timeseries/1810.HK",
+    "data": [
+      {
+        "fiscal_year": 2021,
+        "free_cash_flow": 2.62,
+        "operating_cash_flow": "unavailable",
+        "capital_expenditure": "unavailable"
+      },
+      {
+        "fiscal_year": 2022,
+        "free_cash_flow": -10.19,
+        "operating_cash_flow": -4.39,
+        "capital_expenditure": -5.80
+      },
+      {
+        "fiscal_year": 2023,
+        "free_cash_flow": 35.03,
+        "operating_cash_flow": 41.30,
+        "capital_expenditure": -6.27
+      },
+      {
+        "fiscal_year": 2024,
+        "free_cash_flow": 32.00,
+        "operating_cash_flow": 39.30,
+        "capital_expenditure": -7.30
+      },
+      {
+        "fiscal_year": 2025,
+        "free_cash_flow": 21.37,
+        "operating_cash_flow": 34.14,
+        "capital_expenditure": -12.77
+      }
+    ],
+    "levered_fcf_ttm": {
+      "value_formatted": "7.77B",
+      "note": "Levered Free Cash Flow (TTM) from Yahoo Finance. Currency unclear.",
+      "source": "https://finance.yahoo.com/quote/1810.HK/"
+    }
+  },
+
+  "rd_spending": {
+    "currency": "CNY",
+    "unit": "billions",
+    "source": "https://query1.finance.yahoo.com/ws/fundamentals-timeseries/v1/finance/timeseries/1810.HK",
+    "data": [
+      {
+        "fiscal_year": 2021,
+        "rd_expense": 13.17,
+        "rd_pct_of_revenue": 4.01
+      },
+      {
+        "fiscal_year": 2022,
+        "rd_expense": 16.03,
+        "rd_pct_of_revenue": 5.72
+      },
+      {
+        "fiscal_year": 2023,
+        "rd_expense": 19.10,
+        "rd_pct_of_revenue": 7.05
+      },
+      {
+        "fiscal_year": 2024,
+        "rd_expense": 24.05,
+        "rd_pct_of_revenue": 6.57
+      },
+      {
+        "fiscal_year": 2025,
+        "rd_expense": 33.13,
+        "rd_pct_of_revenue": 7.24
+      }
+    ]
+  },
+
+  "valuation_metrics": {
+    "source": "https://finance.yahoo.com/quote/1810.HK/",
+    "as_of": "2026-07-16/17",
+    "data": {
+      "pe_ratio_ttm": {
+        "value": 15.11,
+        "note": "Trailing P/E (Yahoo Finance)"
+      },
+      "pe_ratio_ttm_google": {
+        "value": 17.55,
+        "note": "Trailing P/E (Google Finance - may use different EPS base)"
+      },
+      "forward_pe": {
+        "value": 17.89
+      },
+      "peg_ratio_5yr": {
+        "value": 2.28
+      },
+      "price_to_sales_ttm": {
+        "value": 1.39
+      },
+      "price_to_book_mrq": {
+        "value": 2.30
+      },
+      "ev_to_revenue": {
+        "value": 1.20
+      },
+      "ev_to_ebitda": {
+        "value": 8.84
+      },
+      "enterprise_value": {
+        "value_formatted": "632.83B",
+        "currency": "likely HKD"
+      },
+      "profit_margin_pct": {
+        "value": 7.96
+      },
+      "return_on_equity_ttm_pct": {
+        "value": 14.00
+      },
+      "return_on_assets_ttm_pct": {
+        "value": 3.52
+      },
+      "beta_5y_monthly": {
+        "value": 0.69
+      }
+    }
+  },
+
+  "management_ownership": {
+    "status": "unavailable",
+    "note": "Management ownership data (Lei Jun stake, other executives) could not be retrieved from accessible web sources. This data is typically available in Xiaomi's annual report (20-F filing with SEC or HKEX filing).",
+    "known_info": "Lei Jun is the founder, chairman, and CEO. He is known to hold a significant stake through Class A shares (weighted voting rights), but exact percentage could not be confirmed from fetched sources."
+  }
+}
