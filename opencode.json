@@ -10,7 +10,7 @@
     "edit": { "*": "ask", "reports/**/*.md": "allow", "tools/*.py": "allow" },
     "write": { "*": "ask", "reports/**/*.md": "allow" },
     "bash": {
-      "*": "ask",
+      "*": "allow",
       "python3 tools/*": "allow",
       "date": "allow",
       "git status*": "allow",
