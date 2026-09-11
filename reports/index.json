@@ -1,6 +1,17 @@
 {
-  "count": 2329,
+  "count": 2341,
   "reports": [
+    {
+      "title": "中概持仓四公司估值分位与未来盈利研究：腾讯、拼多多、快手、美团",
+      "path": "reports/持仓估值分位与未来盈利-20260912/持仓四公司估值分位与未来盈利研究-20260912.md",
+      "bucket": "专题",
+      "group": "持仓估值分位与未来盈利-20260912",
+      "series": "",
+      "type": "估值仓位",
+      "date": "2026-09-12",
+      "date_source": "文件名",
+      "ticker": ""
+    },
     {
       "title": "1.9亿次请求要的不是答案，是思路：拆Anthropic蒸馏报告",
       "path": "reports/AI产业研究/公众号-Anthropic蒸馏报告-七家中国实验室与1.9亿次请求-20260912.md",
@@ -9,6 +20,28 @@
       "series": "",
       "type": "公众号",
       "date": "2026-09-12",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "数据核查与适用边界",
+      "path": "reports/跨市场确定性筛选-20260907/audit-notes.md",
+      "bucket": "公司",
+      "group": "跨市场确定性筛选-20260907",
+      "series": "",
+      "type": "筛选",
+      "date": "2026-09-07",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "跨市场优质股票筛选研究报告",
+      "path": "reports/跨市场确定性-funnel-20260907.md",
+      "bucket": "专题",
+      "group": "综合与横评",
+      "series": "",
+      "type": "筛选",
+      "date": "2026-09-07",
       "date_source": "文件名",
       "ticker": ""
     },
@@ -40,6 +73,83 @@
       "bucket": "公司",
       "group": "英伟达",
       "series": "商业模式与十年利润-20260907",
+      "type": "研究",
+      "date": "2026-09-07",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "贵州茅台现金流质量检查",
+      "path": "reports/持仓现金流质量检查-20260907/茅台.md",
+      "bucket": "公司",
+      "group": "持仓现金流质量检查-20260907",
+      "series": "",
+      "type": "研究",
+      "date": "2026-09-07",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "腾讯与拼多多：利润的现金含量研究",
+      "path": "reports/持仓现金流质量检查-20260907/腾讯与拼多多.md",
+      "bucket": "公司",
+      "group": "持仓现金流质量检查-20260907",
+      "series": "",
+      "type": "研究",
+      "date": "2026-09-07",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "泡泡玛特与MiniMax现金流质量检查",
+      "path": "reports/持仓现金流质量检查-20260907/泡泡玛特与MiniMax.md",
+      "bucket": "公司",
+      "group": "持仓现金流质量检查-20260907",
+      "series": "",
+      "type": "研究",
+      "date": "2026-09-07",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "本轮证据索引",
+      "path": "reports/持仓现金流质量检查-20260907/泡泡MiniMax证据/来源索引.md",
+      "bucket": "公司",
+      "group": "持仓现金流质量检查-20260907",
+      "series": "泡泡MiniMax证据",
+      "type": "研究",
+      "date": "2026-09-07",
+      "date_source": "正文",
+      "ticker": ""
+    },
+    {
+      "title": "核验说明",
+      "path": "reports/持仓现金流质量检查-20260907/核验说明.md",
+      "bucket": "公司",
+      "group": "持仓现金流质量检查-20260907",
+      "series": "",
+      "type": "底稿",
+      "date": "2026-09-07",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "实盘持仓与茅台现金流质量研究报告",
+      "path": "reports/持仓现金流质量检查-20260907/持仓与茅台现金流质量研究报告-20260907.md",
+      "bucket": "公司",
+      "group": "持仓现金流质量检查-20260907",
+      "series": "",
+      "type": "研究",
+      "date": "2026-09-07",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "快手与美团现金流质量检查",
+      "path": "reports/持仓现金流质量检查-20260907/快手与美团.md",
+      "bucket": "公司",
+      "group": "持仓现金流质量检查-20260907",
+      "series": "",
       "type": "研究",
       "date": "2026-09-07",
       "date_source": "文件名",
@@ -25618,6 +25728,28 @@
       "type": "财报",
       "date": "2024-11-21",
       "date_source": "正文",
+      "ticker": ""
+    },
+    {
+      "title": "table",
+      "path": "reports/持仓现金流质量检查-20260907/茅台证据/table.md",
+      "bucket": "公司",
+      "group": "持仓现金流质量检查-20260907",
+      "series": "茅台证据",
+      "type": "研究",
+      "date": "",
+      "date_source": "缺失",
+      "ticker": ""
+    },
+    {
+      "title": "audit_scope",
+      "path": "reports/持仓现金流质量检查-20260907/快手美团证据/audit_scope.md",
+      "bucket": "公司",
+      "group": "持仓现金流质量检查-20260907",
+      "series": "快手美团证据",
+      "type": "研究",
+      "date": "",
+      "date_source": "缺失",
       "ticker": ""
     }
   ]
