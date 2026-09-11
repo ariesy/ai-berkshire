@@ -19,7 +19,7 @@ for t in REV:
     for m in ["pe_ttm", "pb", "ps_static"]:
         v = float(last[m]) * SCALE[t]
         line = f"{t:8s} {m:10s} 现值 {v:7.2f}"
-        for lab, days in [("5年", 5*365), ("10年", 10*365), ("20年", 20*365)]:
+        for lab, days in [("5年", 5*365), ("10年", 10*365), ("20年", 20*365), ("上市以来", 99*365)]:
             w = p[p.date >= last.date - pd.Timedelta(days=days)]; s = w[m].dropna()
             if m == "pe_ttm": s = s[s > 0]
             pct = None if (m == "pe_ttm" and v < 0) else (s < v).mean()*100
