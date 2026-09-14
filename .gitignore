@@ -41,3 +41,6 @@ opencode.json.bak-*
 
 # opencode 本地配置（技能/命令/依赖），仅本机使用
 .opencode/
+
+# 懂车帝研究：涉及个人任职关系，只留本地（原目录已迁到 local/懂车帝/）
+/reports/懂车帝/
