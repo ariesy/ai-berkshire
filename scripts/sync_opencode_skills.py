@@ -1,0 +1,1 @@
+sync-opencode-skills.py
