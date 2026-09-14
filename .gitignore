@@ -38,3 +38,6 @@ reports/portfolio-latest.md
 
 # opencode 本地配置备份
 opencode.json.bak-*
+
+# opencode 本地配置（技能/命令/依赖），仅本机使用
+.opencode/
