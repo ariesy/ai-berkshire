@@ -1,12 +1,111 @@
 {
-  "count": 2364,
+  "count": 2375,
   "reports": [
+    {
+      "title": "茅台：10 年后吨价是现在的几倍，以及 2036 年利润推导",
+      "path": "reports/茅台/茅台-吨价倍数与2036年利润推导-20260926.md",
+      "bucket": "公司",
+      "group": "茅台",
+      "series": "",
+      "type": "研究",
+      "date": "2026-09-26",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "来源与证据边界",
+      "path": "reports/智能廉价时代稀缺性研究-20260926/sources.md",
+      "bucket": "公司",
+      "group": "智能廉价时代稀缺性研究-20260926",
+      "series": "",
+      "type": "研究",
+      "date": "2026-09-26",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "审计说明",
+      "path": "reports/智能廉价时代稀缺性研究-20260926/audit-notes.md",
+      "bucket": "公司",
+      "group": "智能廉价时代稀缺性研究-20260926",
+      "series": "",
+      "type": "研究",
+      "date": "2026-09-26",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "拼多多2036：活下来没有悬念，多赚要看两个变量",
+      "path": "reports/拼多多/拼多多十年后-存续差异化与利润推演-20260926.md",
+      "bucket": "公司",
+      "group": "拼多多",
+      "series": "",
+      "type": "研究",
+      "date": "2026-09-26",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "快手十年后：生态还在不在、为什么还去快手、可灵结局、还能赚多少",
+      "path": "reports/快手/快手十年后-生态存续、可灵结局与盈利方向-20260926.md",
+      "bucket": "公司",
+      "group": "快手",
+      "series": "",
+      "type": "研究",
+      "date": "2026-09-26",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "贵州茅台：年提价5%、基酒与扩产约束下的2036年利润",
+      "path": "reports/茅台/贵州茅台-年提价5%与基酒产能-2036利润补充-20260925.md",
+      "bucket": "公司",
+      "group": "茅台",
+      "series": "",
+      "type": "研究",
+      "date": "2026-09-25",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "贵州茅台：年轻人还喝白酒吗，2036 年能赚多少钱？",
+      "path": "reports/茅台/贵州茅台-investment-team-年轻需求与2036利润-20260925.md",
+      "bucket": "公司",
+      "group": "茅台",
+      "series": "",
+      "type": "研究",
+      "date": "2026-09-25",
+      "date_source": "文件名",
+      "ticker": ""
+    },
     {
       "title": "茅台酒：基酒产量与 5 年后销量的关系，及 2036 年可销售吨数推导",
       "path": "reports/茅台/茅台-基酒产量与5年后销量-2036可售量推导-20260925.md",
       "bucket": "公司",
       "group": "茅台",
       "series": "",
+      "type": "研究",
+      "date": "2026-09-25",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "核查记录：5%提价与产能补充",
+      "path": "reports/茅台/moutai-pricing-capacity-20260925/audit-notes.md",
+      "bucket": "公司",
+      "group": "茅台",
+      "series": "moutai-pricing-capacity-20260925",
+      "type": "研究",
+      "date": "2026-09-25",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "核查说明：茅台需求与2036利润",
+      "path": "reports/茅台/moutai-demand-20260925/audit-notes.md",
+      "bucket": "公司",
+      "group": "茅台",
+      "series": "moutai-demand-20260925",
       "type": "研究",
       "date": "2026-09-25",
       "date_source": "文件名",
@@ -57,7 +156,7 @@
       "ticker": ""
     },
     {
-      "title": "AI 的下一个十年，押成本曲线，别押替代日期",
+      "title": "押成本曲线别押替代日期，一份 AI 十年概率清单",
       "path": "reports/AI产业研究/公众号-AI十年高概率清单-押成本曲线别押替代日期-20260925.md",
       "bucket": "专题",
       "group": "AI产业研究",
@@ -5117,6 +5216,17 @@
       "ticker": ""
     },
     {
+      "title": "全球人形机器人产业链投资研究报告",
+      "path": "reports/community/机器人/人形机器人-全球-industry-20260703.md",
+      "bucket": "其他",
+      "group": "community",
+      "series": "机器人",
+      "type": "研究",
+      "date": "2026-07-03",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
       "title": "腾讯控股（0700.HK）风险因素全景研究",
       "path": "reports/腾讯/腾讯-风险因素全景研究-20260702.md",
       "bucket": "公司",
@@ -5210,6 +5320,17 @@
       "bucket": "公司",
       "group": "openrouter",
       "series": "",
+      "type": "研究",
+      "date": "2026-07-02",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "机器人产业链投资研究报告（中国 · 人形机器人 + 国产替代）",
+      "path": "reports/community/机器人/机器人-industry-20260702.md",
+      "bucket": "其他",
+      "group": "community",
+      "series": "机器人",
       "type": "研究",
       "date": "2026-07-02",
       "date_source": "文件名",
