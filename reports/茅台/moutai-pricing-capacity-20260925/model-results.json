@@ -31,6 +31,15 @@
       "revenue_yi": "3407.42074132737031250000",
       "attributable_profit_yi": "1669.6361632504114531250000"
     },
+    "63000": {
+      "moutai_volume_tonnes": 63000,
+      "moutai_asp_wan": "508.21512355456171875000",
+      "series_volume_tonnes": 55000,
+      "series_asp_wan": "65",
+      "attributable_margin": "0.49",
+      "revenue_yi": "3559.88527839373882812500",
+      "attributable_profit_yi": "1744.3437864129320257812500"
+    },
     "65000": {
       "moutai_volume_tonnes": 65000,
       "moutai_asp_wan": "508.21512355456171875000",

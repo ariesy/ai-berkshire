@@ -22,7 +22,7 @@ out={
  'price_factor':D('1.05')**10,
  'mature_base_liquor_supply_proxy_tonnes':capacity,
  'central_sales_to_supply_proxy':D(68000)/capacity,
- 'volume_sensitivity':{str(v):forecast(v) for v in [48000,52000,60000,65000,68000,70000,72000]},
+ 'volume_sensitivity':{str(v):forecast(v) for v in [48000,52000,60000,63000,65000,68000,70000,72000]},
  'price_sensitivity':{g:forecast(68000,growth=g) for g in ['0.02','0.03','0.05']},
  'margin_sensitivity':{m:forecast(68000,margin=m) for m in ['0.45','0.49','0.52']},
  'bridge':{'previous':old,'price_only':price_only,'moutai_volume_step':volume_step,'series_volume_step':central['attributable_profit_yi'],
