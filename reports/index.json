@@ -1,5 +1,5 @@
 {
-  "count": 2375,
+  "count": 2376,
   "reports": [
     {
       "title": "茅台：10 年后吨价是现在的几倍，以及 2036 年利润推导",
@@ -52,6 +52,17 @@
       "group": "快手",
       "series": "",
       "type": "研究",
+      "date": "2026-09-26",
+      "date_source": "文件名",
+      "ticker": ""
+    },
+    {
+      "title": "AI便宜一千倍后，最贵的是电表、入口和签字的人",
+      "path": "reports/AI产业研究/公众号-智能不再稀缺后什么稀缺-20260926.md",
+      "bucket": "专题",
+      "group": "AI产业研究",
+      "series": "",
+      "type": "公众号",
       "date": "2026-09-26",
       "date_source": "文件名",
       "ticker": ""
